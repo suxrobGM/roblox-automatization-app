@@ -1,0 +1,33 @@
+﻿<Window x:Class="RobloxAutomatization.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:RobloxAutomatization"
+        xmlns:syncfusion="http://schemas.syncfusion.com/wpf"
+        xmlns:prism="http://prismlibrary.com/"
+        mc:Ignorable="d"
+        Title="Roblox Automatization" 
+        Height="450" 
+        Width="520" 
+        WindowStartupLocation="CenterScreen" 
+        ResizeMode="NoResize"
+        prism:ViewModelLocator.AutoWireViewModel="True">
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+            <GradientStop Color="#FFBABABA"/>
+            <GradientStop Color="#FFC2C2C2" Offset="1"/>
+            <GradientStop Color="#FFEBEBEB" Offset="0.485"/>
+        </LinearGradientBrush>
+    </Window.Background>
+    <Grid>
+        <TextBlock HorizontalAlignment="Left" Margin="12,70,0,0" TextWrapping="Wrap" Text="Register accounts limit:" VerticalAlignment="Top" Height="20" Width="139"/>
+        <syncfusion:UpDown HorizontalAlignment="Left" Value="{Binding GeneratedAccountCount}" IsEnabled="{Binding UseUsernameGenerator}" MinValue="1" NumberDecimalDigits="0" Height="25" Margin="151,65,0,0" VerticalAlignment="Top" Width="85"/>
+        <RadioButton Content="Use username generator" IsChecked="{Binding UseUsernameGenerator}" HorizontalAlignment="Left" Margin="157,10,0,0" VerticalAlignment="Top" Height="16" Width="158"/>
+        <RadioButton Content="Use custom usernames" IsChecked="{Binding UseCustomUsername}" HorizontalAlignment="Left" Margin="10,10,0,0" VerticalAlignment="Top"/>
+        <TextBox HorizontalAlignment="Left" Text="{Binding UsernamesFilePath}" IsEnabled="{Binding UseCustomUsername}" IsReadOnly="True" Height="23" Margin="12,31,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="448"/>
+        <Button Content="..." Command="{Binding OpenFileDialogCommand}" IsEnabled="{Binding UseCustomUsername}" HorizontalAlignment="Left" Margin="460,31,0,0" VerticalAlignment="Top" Width="30" Height="24" Background="White" FontWeight="Bold"/>
+        <TextBox Text="{Binding Monitor}" IsReadOnly="True" HorizontalAlignment="Left" Height="270" Margin="12,100,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="478"/>
+        <Button Content="Start" Command="{Binding StartAutomatizationCommand}" HorizontalAlignment="Left" Margin="12,374,0,0" VerticalAlignment="Top" Width="122" Height="24" Background="White"/>
+    </Grid>
+</Window>
