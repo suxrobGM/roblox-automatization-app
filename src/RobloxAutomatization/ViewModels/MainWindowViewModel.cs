@@ -6,6 +6,7 @@ using System.Windows.Forms;
 using Prism.Commands;
 using Prism.Mvvm;
 using RobloxAutomatization.Data;
+using RobloxAutomatization.Helpers;
 using RobloxAutomatization.Models;
 using RobloxAutomatization.Services;
 
@@ -31,7 +32,7 @@ namespace RobloxAutomatization.ViewModels
 
         public MainWindowViewModel(ApplicationDbContext context)
         {
-            TrialCheck();
+            //TrialCheck();
 
             _db = context;
             _db.Database.EnsureCreated();
@@ -57,13 +58,13 @@ namespace RobloxAutomatization.ViewModels
                     }
                     else
                     {
-                        var usernames = File.ReadAllLines(UsernamesFilePath);
+                        var usernames = ExcelParser.ParseUsernames(UsernamesFilePath);
                         int i = 0;
                         foreach (var username in usernames)
                         {
-                            var correctUsername = username.Trim().Replace(" ", "").Replace(",", "");
-                            var generatedUser = UserGenerator.GenerateUser(correctUsername);
-                            RegisterUser(ref generatedUser);
+                            var mergeUsernames = string.Concat(username.Item1, username.Item2);
+                            var generatedUser = UserGenerator.GenerateUser(mergeUsernames);
+                            RegisterUser(ref generatedUser, true);
                             _db.Users.Add(generatedUser);
                             AddToMonitor($"{++i}. {generatedUser}");
                         }
@@ -78,17 +79,17 @@ namespace RobloxAutomatization.ViewModels
                 using (var dialog = new OpenFileDialog())
                 {
                     dialog.Multiselect = false;
-                    dialog.Filter = "Text files (.txt)|*.txt";
+                    dialog.Filter = "Excel file (.xlsx)|*.xlsx";
                     dialog.ShowDialog();
                     UsernamesFilePath = dialog.FileName;
                 }
             });
         }
 
-        private void RegisterUser(ref RobloxUser user)
+        private void RegisterUser(ref RobloxUser user, bool isCustomUsername = false)
         {
             _automatization.GoToRobloxSite();
-            _automatization.RegisterNewUser(ref user);
+            _automatization.RegisterNewUser(ref user, isCustomUsername);
             _automatization.SaveUserCookies(user.Username);
         }
 

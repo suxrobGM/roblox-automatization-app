@@ -40,5 +40,12 @@ namespace RobloxAutomatization.Services
         {
             return new string(Guid.NewGuid().ToString().Replace("-", "").Take(15).ToArray());
         }
+
+        public static string AttachRandomNumber(string username)
+        {
+            username = username.Substring(0, username.Length - 2);
+            username = string.Concat(username, new Random().Next(10, 99));
+            return username;
+        }
     }
 }

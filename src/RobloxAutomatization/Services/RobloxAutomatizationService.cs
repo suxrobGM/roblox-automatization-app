@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Globalization;
 using System.IO;
+using System.Threading;
 using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -29,7 +30,7 @@ namespace RobloxAutomatization.Services
             _driver.Navigate().GoToUrl("https://www.roblox.com/account/signupredir");
         }
 
-        public void RegisterNewUser(ref RobloxUser user)
+        public void RegisterNewUser(ref RobloxUser user, bool isCustomUsername = false)
         {
             WaitForReady(By.Id("signup-button"));
 
@@ -40,15 +41,9 @@ namespace RobloxAutomatization.Services
             SelectOption(month, By.Id("MonthDropdown"));
             SelectOption(day, By.Id("DayDropdown"));
             SelectOption(year, By.Id("YearDropdown"));
-            _driver.FindElement(By.Id("signup-username")).SendKeys(user.Username);
 
-            var errorMsg = _driver.FindElement(By.Id("signup-usernameInputValidation")).Text;
-            while (!string.IsNullOrWhiteSpace(errorMsg))
-            {
-                user.Username = UserGenerator.GenerateOnlyUsername();
-                _driver.FindElement(By.Id("signup-username")).SendKeys(user.Username);
-                errorMsg = _driver.FindElement(By.Id("signup-usernameInputValidation")).Text;
-            }
+            var usernameField = _driver.FindElement(By.Id("signup-username"));
+            usernameField.SendKeys(user.Username);
 
             _driver.FindElement(By.Id("signup-password")).SendKeys(user.Password);
 
@@ -56,6 +51,24 @@ namespace RobloxAutomatization.Services
                 _driver.FindElement(By.Id("FemaleButton")).Click();            
             else
                 _driver.FindElement(By.Id("MaleButton")).Click();
+
+            Thread.Sleep(2000);
+            var errorMsg = _driver.FindElement(By.Id("signup-usernameInputValidation")).Text;
+            while (!string.IsNullOrWhiteSpace(errorMsg))
+            {
+                if (isCustomUsername)
+                {
+                    user.Username = UserGenerator.AttachRandomNumber(user.Username);
+                }
+                else
+                {
+                    user.Username = UserGenerator.GenerateOnlyUsername();
+                }
+                
+                usernameField.Clear();
+                usernameField.SendKeys(user.Username);
+                errorMsg = _driver.FindElement(By.Id("signup-usernameInputValidation")).Text;
+            }
 
             _driver.FindElement(By.Id("signup-button")).Click();
         }
