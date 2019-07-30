@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,12 +14,12 @@ namespace RobloxAutomatization.ViewModels
     public class MainWindowViewModel : BindableBase
     {
         private readonly ApplicationDbContext _db;
+        private readonly IRobloxAutomatizationService _automatization;
         private bool _useCustomUsername;    
         private bool _useUsernameGenerator;
         private int _generatedAccountCount;
         private string _usernamesFilePath;
         private string _monitor;
-        private RobloxAutomatizationService _automatization;
 
         public bool UseCustomUsername { get => _useCustomUsername; set { SetProperty(ref _useCustomUsername, value); } }
         public bool UseUsernameGenerator { get => _useUsernameGenerator; set { SetProperty(ref _useUsernameGenerator, value); } }
@@ -30,20 +29,22 @@ namespace RobloxAutomatization.ViewModels
         public DelegateCommand StartAutomatizationCommand { get; }
         public DelegateCommand OpenFileDialogCommand { get; }
 
-        public MainWindowViewModel(ApplicationDbContext context)
+        public MainWindowViewModel(ApplicationDbContext context, IRobloxAutomatizationService automatizationService)
         {
-            //TrialCheck();
+            //CheckTrial();
 
+            _automatization = automatizationService;
             _db = context;
             _db.Database.EnsureCreated();
             UseCustomUsername = false;
             UseUsernameGenerator = true;
 
+            //_automatization.ConfigureAntichatExtension();
+
             StartAutomatizationCommand = new DelegateCommand(() =>
             {
                 Task.Run(() =>
                 {
-                    _automatization = new RobloxAutomatizationService();
                     _automatization.OpenChrome();
                     
                     if (UseUsernameGenerator)
@@ -51,7 +52,8 @@ namespace RobloxAutomatization.ViewModels
                         for (int i = 1; i <= GeneratedAccountCount; i++)
                         {                           
                             var generatedUser = UserGenerator.GenerateUser();
-                            RegisterUser(ref generatedUser);
+                            _automatization.RegisterNewUser(ref generatedUser);
+                            _automatization.SaveUserCookies(generatedUser.Username);
                             _db.Users.Add(generatedUser);
                             AddToMonitor($"{i}. {generatedUser}");
                         }
@@ -64,7 +66,8 @@ namespace RobloxAutomatization.ViewModels
                         {
                             var mergeUsernames = string.Concat(username.Item1, username.Item2);
                             var generatedUser = UserGenerator.GenerateUser(mergeUsernames);
-                            RegisterUser(ref generatedUser, true);
+                            _automatization.RegisterNewUser(ref generatedUser, true);
+                            _automatization.SaveUserCookies(generatedUser.Username);
                             _db.Users.Add(generatedUser);
                             AddToMonitor($"{++i}. {generatedUser}");
                         }
@@ -84,14 +87,7 @@ namespace RobloxAutomatization.ViewModels
                     UsernamesFilePath = dialog.FileName;
                 }
             });
-        }
-
-        private void RegisterUser(ref RobloxUser user, bool isCustomUsername = false)
-        {
-            _automatization.GoToRobloxSite();
-            _automatization.RegisterNewUser(ref user, isCustomUsername);
-            _automatization.SaveUserCookies(user.Username);
-        }
+        }        
 
         private void AddToMonitor(string str)
         {
@@ -101,9 +97,9 @@ namespace RobloxAutomatization.ViewModels
             Monitor = builder.ToString();
         }
 
-        private void TrialCheck()
+        private void CheckTrial()
         {
-            var expiredDay = new DateTime(2019, 07, 21);
+            var expiredDay = new DateTime(2019, 08, 3);
  
             if (DateTime.Now > expiredDay)
             {

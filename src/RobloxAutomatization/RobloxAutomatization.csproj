@@ -250,6 +250,7 @@
     </Compile>
     <Compile Include="Migrations\ApplicationDbContextModelSnapshot.cs" />
     <Compile Include="Models\RobloxUser.cs" />
+    <Compile Include="Services\IRobloxAutomatizationService.cs" />
     <Compile Include="Services\RobloxAutomatizationService.cs" />
     <Compile Include="Services\UserGenerator.cs" />
     <Compile Include="ViewModels\MainWindowViewModel.cs" />

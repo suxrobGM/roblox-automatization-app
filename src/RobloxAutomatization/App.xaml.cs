@@ -2,6 +2,7 @@
 using Prism.Ioc;
 using Prism.Unity;
 using RobloxAutomatization.Data;
+using RobloxAutomatization.Services;
 using RobloxAutomatization.Views;
 
 namespace RobloxAutomatization
@@ -20,6 +21,7 @@ namespace RobloxAutomatization
         {
             containerRegistry.Register<MainWindow>();
             containerRegistry.Register<ApplicationDbContext>();
+            containerRegistry.Register<IRobloxAutomatizationService, RobloxAutomatizationService>();
         }
     }
 }

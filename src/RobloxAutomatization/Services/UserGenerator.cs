@@ -27,7 +27,7 @@ namespace RobloxAutomatization.Services
 
             var user = new RobloxUser
             {
-                Username = $"{username}{rnd.Next(10, 99)}",
+                Username = $"{username}{rnd.Next(1000, 9999)}",
                 Password = Guid.NewGuid().ToString().Replace("-", ""),
                 Gender = Gender.Male,
                 Birthday = new DateTime(rnd.Next(1970, 2010), rnd.Next(1, 12), rnd.Next(1, 27))
@@ -43,8 +43,8 @@ namespace RobloxAutomatization.Services
 
         public static string AttachRandomNumber(string username)
         {
-            username = username.Substring(0, username.Length - 2);
-            username = string.Concat(username, new Random().Next(10, 99));
+            username = username.Substring(0, username.Length - 4);
+            username = string.Concat(username, new Random().Next(1000, 9999));
             return username;
         }
     }

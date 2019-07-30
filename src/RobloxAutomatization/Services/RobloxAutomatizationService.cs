@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO;
 using System.Threading;
+using System.Windows;
 using Newtonsoft.Json;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
@@ -10,34 +11,46 @@ using RobloxAutomatization.Models;
 
 namespace RobloxAutomatization.Services
 {
-    public class RobloxAutomatizationService
+    public class RobloxAutomatizationService : IRobloxAutomatizationService
     {
+        private readonly ChromeOptions _chromeOptions;
         private IWebDriver _driver;
 
         public RobloxAutomatizationService()
         {
-        }
-        
-        public void OpenChrome()
-        {
-            var driverService = ChromeDriverService.CreateDefaultService();
-            var chromeOptions = new ChromeOptions();
-            _driver = new ChromeDriver(driverService, chromeOptions);
+            _chromeOptions = new ChromeOptions();
+            _chromeOptions.AddArgument("user-data-dir=robloxAutomatization");
         }
 
-        public void GoToRobloxSite()
+        public void ConfigureAntichatExtension()
         {
-            _driver.Navigate().GoToUrl("https://www.roblox.com/account/signupredir");
+            _driver = new ChromeDriver(_chromeOptions);
+            _driver.Navigate().GoToUrl("https://antcpt.com/eng/download/google-chrome-options/manual-crx.html");
+        }
+
+        public void OpenChrome()
+        {
+            _driver = new ChromeDriver(_chromeOptions);
+            _driver.Navigate().GoToUrl("https://www.roblox.com");
         }
 
         public void RegisterNewUser(ref RobloxUser user, bool isCustomUsername = false)
         {
+            if (IsElementPresent(By.XPath("//a[@data-bind='popover-setting']")))
+            {
+                Logout();
+            }
+
             WaitForReady(By.Id("signup-button"));
 
             var dateSplitted = user.Birthday.ToString("MMM dd yyyy", new CultureInfo("en-US")).Split();
             var month = dateSplitted[0];
             var day = dateSplitted[1];
             var year = dateSplitted[2];
+
+            //MessageBox.Show($"{month} {day} {year}");
+            Thread.Sleep(1000);
+            
             SelectOption(month, By.Id("MonthDropdown"));
             SelectOption(day, By.Id("DayDropdown"));
             SelectOption(year, By.Id("YearDropdown"));
@@ -52,7 +65,7 @@ namespace RobloxAutomatization.Services
             else
                 _driver.FindElement(By.Id("MaleButton")).Click();
 
-            Thread.Sleep(2000);
+            Thread.Sleep(1500);
             var errorMsg = _driver.FindElement(By.Id("signup-usernameInputValidation")).Text;
             while (!string.IsNullOrWhiteSpace(errorMsg))
             {
@@ -69,7 +82,7 @@ namespace RobloxAutomatization.Services
                 usernameField.SendKeys(user.Username);
                 errorMsg = _driver.FindElement(By.Id("signup-usernameInputValidation")).Text;
             }
-
+            Thread.Sleep(500);
             _driver.FindElement(By.Id("signup-button")).Click();
         }
 
@@ -81,7 +94,15 @@ namespace RobloxAutomatization.Services
             WaitForReady(By.Id("places-list-container"));
 
             var cookies = _driver.Manage().Cookies.AllCookies;
-            File.WriteAllText($"cookies\\{username}.json", JsonConvert.SerializeObject(cookies, Formatting.Indented));            
+            File.WriteAllText($"cookies\\{username}.json", JsonConvert.SerializeObject(cookies, Formatting.Indented));
+            Logout();
+        }
+
+        private void Logout()
+        {
+            _driver.FindElement(By.XPath("//a[@data-bind='popover-setting']")).Click();
+            _driver.FindElement(By.XPath("//a[@data-behavior='logout']")).Click();
+            _driver.Navigate().GoToUrl("https://www.roblox.com");
         }
 
         private void SelectOption(string optionName, By selectInput)
